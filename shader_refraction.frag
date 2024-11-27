@@ -15,16 +15,34 @@ uniform samplerCube iSky;
 #define maxSteps 100
 //Snow 3D
 #define layers 100
-#define depth 0.1
+#define depth 0.2
 #define width 0.9
-//#define speed 0.8
-//Snow2D
-#define snowflakeAmount 100
-#define blizzardFactor 0.5
+#define speed 0.8
 
-vec3 glasscol = vec3(0.06,0.1,0.15);
+const vec3 glasscol = vec3(0.06,0.1,0.15);
 
+const mat3 pSnow = mat3(13.323122,23.5112,21.71123,21.1212,28.7312,11.9312,21.8112,14.7212,61.3934);
 float rnd(float n) {return fract(sin(n * 0.1346) * 43758.5453123);}
+
+vec3 snow(vec2 uv) {
+    vec3 snowColor = vec3(0.);
+    float dof = 5. * sin(iTime * .1);
+    for(int i=0; i<layers; i++) {
+        float fi = float(i);
+        vec2 q = uv*(1. + fi*depth);
+        q += vec2(q.y*(width*mod(fi*7.238917, 1.)-width*.5), speed*iTime/(1. + fi*depth*.03));
+        vec3 n = vec3(floor(q), 31.189+fi);
+        vec3 m = floor(n)*.00001 + fract(n);
+        vec3 mp = (31415.9 + m) * fract(pSnow*m);
+        vec3 r = fract(mp);
+        vec2 s = abs(mod(q,1.)-.5+.9*r.xy-.45);
+	    s += .01*abs(2.*fract(10.*q.yx)-1.); 
+	    float d = .6*max(s.x-s.y,s.x+s.y)+max(s.x,s.y)-.01;
+	    float edge = .005+.05*min(.5*abs(fi-5.-dof),1.);
+	    snowColor += vec3(smoothstep(edge,-edge,d)*(r.x/(1.+.02*fi*depth)));
+    }
+    return snowColor;
+}
 
 // Sphere
 float sdSphere(vec3 p, float s) {
@@ -142,39 +160,15 @@ void main() {
         float fresnel = pow(1. + dot(rd, n), 3.);
         col = mix(reflTex, refl, fresnel);
 
+        // Snow
+        uv = -iMouse.xy/iResolution.xy + vec2(1.,iResolution.y/iResolution.x)*gl_FragCoord.xy / iResolution.xy;
+        vec3 snowColor = snow(-rdOut.xy);
+        col += snowColor;
+        
+    
     }
     
     col = pow(col, vec3(.4545));	// gamma correction
 
-    // // Snow
-	// const mat3 p = mat3(13.323122,23.5112,21.71123,21.1212,28.7312,11.9312,21.8112,14.7212,61.3934);
-    // uv = iMouse.xy/iResolution.xy + vec2(1.,iResolution.y/iResolution.x)*gl_FragCoord.xy / iResolution.xy;
-
-
-    // vec3 acc = vec3(0.);
-    // float dof = 5. * sin(iTime * .1);
-    // for(int i=0; i<layers; i++) {
-    //     float fi = float(i);
-    //     vec2 q = uv*(1. + fi*depth);
-    //     q += vec2(q.y*(width*mod(fi*7.238917, 1.)-width*.5), speed*iTime/(1. + fi*depth*.03));
-    //     vec3 n = vec3(floor(q), 31.189+fi);
-    //     vec3 m = floor(n)*.00001 + fract(n);
-    //     vec3 mp = (31415.9 + m) * fract(p*m);
-    //     vec3 r = fract(mp);
-    //     vec2 s = abs(mod(q,1.)-.5+.9*r.xy-.45);
-	// 	s += .01*abs(2.*fract(10.*q.yx)-1.); 
-	// 	float d = .6*max(s.x-s.y,s.x+s.y)+max(s.x,s.y)-.01;
-	// 	float edge = .005+.05*min(.5*abs(fi-5.-dof),1.);
-	// 	acc += vec3(smoothstep(edge,-edge,d)*(r.x/(1.+.02*fi*depth)));
-    // }
-
-    vec4 snowColor = vec4(0.);
-
-    float j;
-    
-    for(int i=0; i<snowflakeAmount; i++){
-
-    }
-
-    gl_FragColor = vec4(col + snowColor.xyz, 1.);
+    gl_FragColor = vec4(col, 1.);
 }
