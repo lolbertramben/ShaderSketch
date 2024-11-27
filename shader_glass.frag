@@ -26,6 +26,7 @@ float map(vec3 p) {
     return length(p) - 1.0;
 }
 
+// Get normal
 vec3 nor(vec3 p) {
     float h = map(p);
     vec2 d = vec2(0.01, 0.0);
@@ -35,6 +36,7 @@ vec3 nor(vec3 p) {
 vec3 glasscol = vec3(0.06, 0.1, 0.15);
 float glassstep = 0.05;
 float refr = 1.04;
+float maxStep = 1.;
 
 vec4 trace(vec3 rs, vec3 rd, vec2 fragCoord) {
     float t = 0.0;
@@ -50,17 +52,24 @@ vec4 trace(vec3 rs, vec3 rd, vec2 fragCoord) {
 
     p += rd * spheret;
 
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 50; ++i) {
         float h = map(p);
         h *= inside;
+
+        // Finder ud af om vi er inde i kuglen
         if (h <= 0.0) {
             p += h * rd;
             vec3 n = nor(p);
+            // nrd < 0.0 hvis vi er inde i kuglen
             float nrd = dot(n, rd) * inside;
 
+            // Hvis inde i kuglen
             if (nrd < 0.0) {
+                // Reflektionsvektoren
                 vec3 rr = reflect(rd, n);
+                // Reflektion
                 float rocc = max(0.0, rr.y * 1. * inside);
+                // Fresnel-effekten
                 float fr = pow(1.0 + nrd, 5.0) * 0.99 + 0.01;
 
                 col.xyz += col.w * fr * 3.0 * rocc * pow(texture2D(texture3, rr.xy).xyz, vec3(2.2));
@@ -71,7 +80,12 @@ vec4 trace(vec3 rs, vec3 rd, vec2 fragCoord) {
                 col.w *= 0.95;
             }
         }
+        // Beregn step-størrelse
         float step = max(0.01, abs(h) * 0.95);
+        if (step > maxStep) {
+            break; // Stop, hvis step-størrelsen er for stor
+        }
+
         if (inside < 0.0) {
             step = min(step, glassstep);
             vec3 gcol = vec3(0.1);
@@ -85,6 +99,8 @@ vec4 trace(vec3 rs, vec3 rd, vec2 fragCoord) {
             col.w *= k;
         } else step = min(step, 5.0);
         p += step * rd;
+
+        
         
     }
 
