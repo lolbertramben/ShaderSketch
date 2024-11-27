@@ -6,9 +6,9 @@ uniform float iTime;
 
 // Tweakable parameters
 float fov = .6; // Field of view
-float maxTravelDistance = 35.; // Amount of visible balls
-float ballSize = 1.; //auto: 1. : mouse: .35 Size of the balls
-float ballsInFrame = .1; //auto: .2 : mouse: 20. Number of balls in the frame
+float maxTravelDistance = 25.; // Amount of visible balls
+float ballSize = .35; //auto: 1. : mouse: .35 Size of the balls
+float ballsInFrame = 20.; //auto: .2 : mouse: 20. Number of balls in the frame
 
 // PI
 float PI = 3.1415926535897932384626433832795;
@@ -58,8 +58,7 @@ float map(vec3 p) {
 
   // Sphere transform
   p.z -= ballsInFrame;
-  
-  //p.xy = fract(p.xy) - 0.5; // Repeat the scene
+  p.xy = fract(p.xy) - 0.5; // Repeat the scene
   float sphere = sdSphere(p, ballSize); // Box SDF
   //float ground = p.y + 0.75; // Ground plane
 
@@ -72,7 +71,7 @@ void main() {
 
   // Camera Initialization
   fov = .6; 
-  float fog = .0001;                       // Field of view
+  float fog = .01;                       // Field of view
   // initialize the ray
   vec3 rayOrigin = vec3(0.0, 0.0, -3.0);  // Ray origin
   vec3 rayDir = normalize(vec3(uv * fov, 1.0)); // Ray direction with length 1
@@ -81,20 +80,20 @@ void main() {
 
 
   // Raymarching
-  const int maxSteps = 120;                // Maximum number of steps
+  const int maxSteps = 100;                // Maximum number of steps
   for (int i = 0; i < maxSteps; i++) {
     vec3 p = rayOrigin + rayDir * t;      // The ray's current position
     float d = map(p);                     // Distance to the scene
-    t += d;                               // Move the ray along the direction by the distance to the scene
+    t += d;                                // Move the ray along the direction by the distance to the scene
     
-    // Ray Transforms
-    // rayOrigin.y += sin(clamp(-m.y, -1., 1.)) * 0.01;
-    // rayOrigin.x += sin(clamp(m.x, -1., 1.)) * 0.01;
-    // rayOrigin.z += sin(-1.) * 0.01;
+    //Ray Transforms
+    rayOrigin.y += sin(clamp(-m.y, -1., 1.)) * 0.01;
+    rayOrigin.x += sin(clamp(m.x, -1., 1.)) * 0.01;
+    rayOrigin.z += sin(-1.) * 0.01;  
 
-    rayOrigin.y += sin(iTime*1.2) * 0.001;
-    rayOrigin.x += cos(iTime*0.9) * 0.001;
-    rayOrigin.z += sin(iTime*0.5) * 0.008;
+    // rayOrigin.y += sin(iTime*1.2) * 0.001;
+    // rayOrigin.x += cos(iTime*0.9) * 0.001;
+    // rayOrigin.z += sin(iTime*0.5) * 0.008;
 
     // Coloring
     col = vec3(float(i)) / float(maxSteps); // Color based on the number of steps taken by the ray

@@ -8,31 +8,20 @@ uniform sampler2D texture1; // Samme som iChannel1
 uniform sampler2D texture2; // Samme som iChannel2
 uniform sampler2D texture3; // Samme som iChannel3
 
-vec3 roty(float th, vec3 p) {
-    float c = cos(th), s = sin(th);
-    return vec3(c * p.x - s * p.z, p.y, c * p.z + s * p.x);
-}
+float PI = 3.1415926535897932384626433832795;
 
-vec3 rotx(float th, vec3 p) {
-    float c = cos(th), s = sin(th);
-    return vec3(p.x, c * p.y - s * p.z, c * p.z + s * p.y);
+// Rotate 2D
+mat2 rot2D(float angle) {
+  float s = sin(angle);
+  float c = cos(angle);
+  return mat2(c, -s, s, c);
 }
 
 float hash(float n) {
     return fract(sin(n * 0.1346) * 43758.5453123);
 }
 
-vec2 noise(in vec3 x) {
-    vec3 p = floor(x);
-    vec3 f = fract(x);
-    f = f * f * (3.0 - 2.0 * f);
-
-    vec2 uv = (p.xy + vec2(37.0, 17.0) * p.z) + f.xy;
-    vec4 rg = texture2D(texture0, (uv + 0.5) / 256.0).yxwz;
-    return mix(rg.xz, rg.yw, f.z);
-}
-
-//Sphere
+// Scene
 float map(vec3 p) {
     return length(p) - 1.0;
 }
@@ -44,27 +33,6 @@ vec3 nor(vec3 p) {
 }
 
 vec3 glasscol = vec3(0.06, 0.1, 0.15);
-
-// Rotation matrix by Syntopia
-mat3 rotmat(vec3 v, float angle) {
-    float c = cos(angle);
-    float s = sin(angle);
-
-    return mat3(
-        c + (1.0 - c) * v.x * v.x, (1.0 - c) * v.x * v.y - s * v.z, (1.0 - c) * v.x * v.z + s * v.y,
-        (1.0 - c) * v.x * v.y + s * v.z, c + (1.0 - c) * v.y * v.y, (1.0 - c) * v.y * v.z - s * v.x,
-        (1.0 - c) * v.x * v.z - s * v.y, (1.0 - c) * v.y * v.z + s * v.x, c + (1.0 - c) * v.z * v.z
-    );
-}
-
-vec4 warp(vec3 p) {
-    p = rotmat(normalize(vec3(1.0, 0.0, 0.0)), p.x * 1.5) * p;
-    float cyr = sqrt(1.0 - p.x * p.x) * 0.6;
-    cyr *= 0.6 + 0.4 * sin(7.0 * atan(p.y, p.z));
-    float dd = smoothstep(cyr * 1.1, cyr, length(p.yz));
-    return vec4(p, dd);
-}
-
 float glassstep = 0.05;
 float refr = 1.04;
 
@@ -82,7 +50,7 @@ vec4 trace(vec3 rs, vec3 rd, vec2 fragCoord) {
 
     p += rd * spheret;
 
-    for (int i = 0; i < 64; ++i) {
+    for (int i = 0; i < 100; ++i) {
         float h = map(p);
         h *= inside;
         if (h <= 0.0) {
@@ -106,35 +74,35 @@ vec4 trace(vec3 rs, vec3 rd, vec2 fragCoord) {
         float step = max(0.01, abs(h) * 0.95);
         if (inside < 0.0) {
             step = min(step, glassstep);
-            vec4 warp0 = warp(p);
-            float warp1 = warp(p + vec3(0.0, 0.02, 0.0)).w;
-            vec3 gcol = texture2D(texture1, warp0.yz * 0.3 + 0.1).xyz;
-            gcol = mix(gcol, vec3(0.5), -1.9);
-            gcol *= vec3(0.5 - (warp1 - warp0.w));
-            float dd = warp0.w * 4.0;
+            vec3 gcol = vec3(0.1);
+            gcol = mix(gcol, vec3(0.5), -.9);
+            float dd = 1. * 4.0;
             float k = exp(-step * dd);
             col.xyz += (1.0 - k) * col.w * gcol;
             col.w *= k;
-
             k = exp(-step * 0.5);
             col.xyz += (1.0 - k) * col.w * glasscol;
             col.w *= k;
         } else step = min(step, 5.0);
         p += step * rd;
+        
     }
 
     col.w = 1.0 - col.w;
-    col.xyzw *= smoothstep(0.0, 0.1, q);
+    col.xyzw *= smoothstep(0.0, 0.2, q);
 
+    //
     float flot = (-1.0 - p.y) / rd.y;
     vec3 flo = p + flot * rd;
-    vec3 bg = vec3(1.0);
+    vec3 bg = vec3(1., 1., 1.);
     if (dot(rd, flo - rs) > 0.0) {
         bg.xyz = vec3(sqrt(1.05 - 1.0 / dot(flo, flo)));
     }
+
+    // Background pattern
     vec2 strip;
-    float sca = 2.;
-    strip.x = (atan(rd.x, rd.z) * sca * 24.0 / 3.141592);
+    float sca = 1.;
+    strip.x = (atan(rd.x, rd.z) * sca * 24.0 / PI);
     strip.y = (asin(rd.y) * 10.0 * sca);
     float f = hash(floor(strip.x) + floor(strip.y) * 117.0);
     strip = fract(strip);
@@ -153,12 +121,19 @@ void main() {
     vec2 uv = (gl_FragCoord.xy - iResolution.xy) / iResolution.y;
     vec2 m = (iMouse.xy * 2. - iResolution.xy) / iResolution.y;
     
+    // Rotation X
     float th = (m.y * 0.1 - 0.5) * 1.0;
-    vec3 rs = rotx(th, vec3(0, 0, -2.0));
-    vec3 re = rotx(th, vec3(uv * 3.0, 2.0));
+    vec3 rs = vec3(0, 0, -2.0);
+    vec3 re = vec3(uv * 3.0, 2.0);
+    rs.yz *= rot2D(th);
+    re.yz *= rot2D(th);
+
+    // Rotation Y
     th = (-m.x - 0.5) * 6.0 + iTime * 0.071 - 5.1;
-    rs = roty(th, rs);
-    re = roty(th, re);
+    rs.xz *= rot2D(th);
+    re.xz *= rot2D(th);
+
+    // Ray marching
     vec3 rd = normalize(re - rs);
     vec4 col = trace(rs, rd, gl_FragCoord.xy);
     col += 4.0 / 255.0 * hash(gl_FragCoord.x + gl_FragCoord.y * 117.0);
