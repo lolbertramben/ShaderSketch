@@ -82,7 +82,7 @@ float getLight(vec3 p) {
   vec3 normal = getNormal(p); // Normal at the point
   float diffuseLight = clamp(dot(normal, lightDir), 0., 1.); // Diffuse lighting
   // Shadows
-  float t = rayMarching(p + normal * 0.01, lightDir); // Distance to the light
+  float t = rayMarching(p + normal * 0.02, lightDir); // Distance to the light
   if (t < length(lightPos - p)) diffuseLight *= 0.1; // Shadow
 
   return diffuseLight; // Diffuse lighting
@@ -98,13 +98,13 @@ void main() {
   vec3 rayOrigin = vec3(0.0, 0.0, -3.0);  // Ray origin
   vec3 rayDir = normalize(vec3(uv * fov, 1.0)); // Ray direction with length 1
 
-  // // Mouse movement horizontal
-  // rayOrigin.yz *= rot2D(m.y);
-  // rayDir.yz *= rot2D(m.y);  
+  // Mouse movement horizontal
+  rayOrigin.yz *= rot2D(m.y);
+  rayDir.yz *= rot2D(m.y);  
   
-  // // Mouse movement horizontal
-  // rayOrigin.xz *= rot2D(-m.x);
-  // rayDir.xz *= rot2D(-m.x);                         // total distance traveled by the ray
+  // Mouse movement horizontal
+  rayOrigin.xz *= rot2D(-m.x);
+  rayDir.xz *= rot2D(-m.x);                         // total distance traveled by the ray
 
   // Raymarching
   float t = rayMarching(rayOrigin, rayDir);

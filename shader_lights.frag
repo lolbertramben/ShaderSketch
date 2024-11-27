@@ -7,8 +7,8 @@ uniform float iTime;
 // Tweakable parameters
 float fov = .6; // Field of view
 float maxTravelDistance = 25.; // Amount of visible balls
-float ballSize = .35; //auto: 1. : mouse: .35 Size of the balls
-float ballsInFrame = 20.; //auto: .2 : mouse: 20. Number of balls in the frame
+float ballSize = 1.; //auto: 1. : mouse: .35 Size of the balls
+float ballsInFrame = .2; //auto: .2 : mouse: 20. Number of balls in the frame
 
 // PI
 float PI = 3.1415926535897932384626433832795;
@@ -58,7 +58,7 @@ float map(vec3 p) {
 
   // Sphere transform
   p.z -= ballsInFrame;
-  p.xy = fract(p.xy) - 0.5; // Repeat the scene
+  //p.xy = fract(p.xy) - 0.5; // Repeat the scene
   float sphere = sdSphere(p, ballSize); // Box SDF
   //float ground = p.y + 0.75; // Ground plane
 
@@ -87,20 +87,20 @@ void main() {
     t += d;                                // Move the ray along the direction by the distance to the scene
     
     //Ray Transforms
-    rayOrigin.y += sin(clamp(-m.y, -1., 1.)) * 0.01;
-    rayOrigin.x += sin(clamp(m.x, -1., 1.)) * 0.01;
-    rayOrigin.z += sin(-1.) * 0.01;  
+    // rayOrigin.y += sin(clamp(-m.y, -1., 1.)) * 0.01;
+    // rayOrigin.x += sin(clamp(m.x, -1., 1.)) * 0.01;
+    // rayOrigin.z += sin(-1.) * 0.01;  
 
-    // rayOrigin.y += sin(iTime*1.2) * 0.001;
-    // rayOrigin.x += cos(iTime*0.9) * 0.001;
-    // rayOrigin.z += sin(iTime*0.5) * 0.008;
+    rayOrigin.y += sin(iTime*1.2) * 0.001;
+    rayOrigin.x += cos(iTime*0.9) * 0.001;
+    rayOrigin.z += sin(iTime*0.5) * 0.008;
 
     // Coloring
     col = vec3(float(i)) / float(maxSteps); // Color based on the number of steps taken by the ray
     if (d < 0.001 || t > maxTravelDistance) break;      // If the distance is very small, we assume the ray has hit the object  }
   }
   // Coloring
-  col += vec3(t * fog);                    // Color based on the distance traveled by the ray
+  //col += vec3(t * fog);                    // Color based on the distance traveled by the ray
   col *= noise(gl_FragCoord.xyz, .5, 4.); // Add noise
 
   gl_FragColor = vec4(col, 1.0);

@@ -17,10 +17,6 @@ mat2 rot2D(float angle) {
   return mat2(c, -s, s, c);
 }
 
-float hash(float n) {
-    return fract(sin(n * 0.1346) * 43758.5453123);
-}
-
 // Scene
 float map(vec3 p) {
     return length(p) - 1.0;
@@ -33,6 +29,7 @@ vec3 nor(vec3 p) {
     return normalize(vec3(map(p + d.xyy), map(p + d.yxy), map(p + d.yyx)) - h);
 }
 
+vec3 bgcol = vec3(1.0, 1.0, 1.0);
 vec3 glasscol = vec3(0.06, 0.1, 0.15);
 float glassstep = 0.05;
 float refr = 1.04;
@@ -76,7 +73,6 @@ vec4 trace(vec3 rs, vec3 rd, vec2 fragCoord) {
 
                 if (q > 0.1) rd = inside * normalize(refract(rd * inside, n, (inside < 0.0) ? refr : (1.0 / refr)));
                 inside = -inside;
-                if (inside < 0.0) h = hash(fragCoord.x + fragCoord.y * 117.0) * glassstep;
                 col.w *= 0.95;
             }
         }
@@ -88,7 +84,7 @@ vec4 trace(vec3 rs, vec3 rd, vec2 fragCoord) {
 
         if (inside < 0.0) {
             step = min(step, glassstep);
-            vec3 gcol = vec3(0.1);
+            vec3 gcol = bgcol * 0.1;
             gcol = mix(gcol, vec3(0.5), -.9);
             float dd = 1. * 4.0;
             float k = exp(-step * dd);
@@ -110,7 +106,7 @@ vec4 trace(vec3 rs, vec3 rd, vec2 fragCoord) {
     //
     float flot = (-1.0 - p.y) / rd.y;
     vec3 flo = p + flot * rd;
-    vec3 bg = vec3(1., 1., 1.);
+    vec3 bg = bgcol;
     if (dot(rd, flo - rs) > 0.0) {
         bg.xyz = vec3(sqrt(1.05 - 1.0 / dot(flo, flo)));
     }
@@ -118,15 +114,13 @@ vec4 trace(vec3 rs, vec3 rd, vec2 fragCoord) {
     // Background pattern
     vec2 strip;
     float sca = 1.;
-    strip.x = (atan(rd.x, rd.z) * sca * 24.0 / PI);
-    strip.y = (asin(rd.y) * 10.0 * sca);
-    float f = hash(floor(strip.x) + floor(strip.y) * 117.0);
+    strip.x = (atan(rd.x, rd.z) * sca * 12.0 / PI);
+    strip.y = (asin(rd.y) * 6.0 * sca);
     strip = fract(strip);
-    if (f < 0.5) strip.x = 1.0 - strip.x;
 
     float stripe = smoothstep(0.05, 0.08, abs(length(strip) - 0.5));
     stripe *= smoothstep(0.05, 0.08, abs(length(1.0 - strip) - 0.5));
-    stripe = 1.0 - stripe;
+    //stripe = .1 - stripe;
     stripe *= smoothstep(0.0, 0.9, rd.y);
     bg *= 1.0 - stripe * 0.2;
     col.xyz += col.w * bg;
@@ -152,9 +146,11 @@ void main() {
     // Ray marching
     vec3 rd = normalize(re - rs);
     vec4 col = trace(rs, rd, gl_FragCoord.xy);
-    col += 4.0 / 255.0 * hash(gl_FragCoord.x + gl_FragCoord.y * 117.0);
-    col = mix(col, smoothstep(0.0, 1.0, col), 0.5);
-    col = pow(col, vec4(0.4));
-    col *= vec4(smoothstep(2.0, 0.0, length(uv * vec2(0.25, 0.5))));
+    col += 4.0 / 255.0;
+    col = mix(col, smoothstep(0., 1., col), 0.5);
+    col = pow(col, vec4(.8));
+    // Sort rim
+    col *= vec4(smoothstep(2.0, 0.0, length(uv * vec2(0.5, .8))));
+    col += vec4(212, 125, 11, 255)/255.;
     gl_FragColor = col;
 }
