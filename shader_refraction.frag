@@ -7,6 +7,7 @@ uniform samplerCube iSky;
 //scene
 #define PI 3.14159265359
 #define TAU 6.28318530718
+#define fov 1.5
 #define IOR 1.3 // Index of refraction
 #define abb .01 // Absorption
 #define density .1 // Optical density
@@ -39,7 +40,7 @@ vec3 snow(vec2 uv) {
 	    s += .01*abs(2.*fract(10.*q.yx)-1.); 
 	    float d = .6*max(s.x-s.y,s.x+s.y)+max(s.x,s.y)-.01;
 	    float edge = .005+.05*min(.5*abs(fi-5.-dof),1.);
-	    snowColor += vec3(smoothstep(edge,-edge,d)*(r.x/(1.+.02*fi*depth)));
+	    snowColor += vec3(smoothstep(edge,-edge,d)*(r.x/(1.+.02*fi*depth)))*3.;
     }
     return snowColor;
 }
@@ -104,14 +105,16 @@ vec3 GetRayDir(vec2 uv, vec3 p, vec3 l, float z) {
 
 void main() {
     vec2 uv = (gl_FragCoord.xy - iResolution.xy) / iResolution.y;
-    vec2 m = (iMouse.xy * 2. - iResolution.xy) / iResolution.y;
+    vec2 m = vec2(0);
+    m.x = (iMouse.x * 2. - iResolution.x) / iResolution.x;
+    m.y = (iMouse.y * 2. - iResolution.y) / iResolution.y;
 
 
     vec3 ro = vec3(0, 0, -3);
-    ro.yz *= rot2D(m.y);
-    ro.xz *= rot2D(-m.x * TAU);
+    ro.yz *= rot2D(m.y/2.);
+    ro.xz *= rot2D(-m.x/2.);
     
-    vec3 rd = GetRayDir(uv, ro, vec3(0,0.,0), 1.);
+    vec3 rd = GetRayDir(uv, ro, vec3(0,0.,0), fov);
     
     vec3 col = textureCube(iSky, rd).rgb;
    

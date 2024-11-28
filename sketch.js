@@ -1,16 +1,25 @@
 let shaderProgram;
 let version = 'refraction';
 let cubeMap;
+const texture = 'soft_dark_upscale';
 
 function preload() {
     shaderProgram = loadShader(`shader_base.vert`, `shader_${version}.frag`);
+    // cubeMap = {
+    //     px: loadImage('assets/night_sky_px.png'),
+    //     nx: loadImage('assets/night_sky_nx.png'),
+    //     py: loadImage('assets/night_sky_py.png'),
+    //     ny: loadImage('assets/night_sky_ny.png'),
+    //     pz: loadImage('assets/night_sky_pz.png'),
+    //     nz: loadImage('assets/night_sky_nz.png')
+    // };
     cubeMap = {
-        px: loadImage('assets/night_sky_px.png'),
-        nx: loadImage('assets/night_sky_nx.png'),
-        py: loadImage('assets/night_sky_py.png'),
-        ny: loadImage('assets/night_sky_ny.png'),
-        pz: loadImage('assets/night_sky_pz.png'),
-        nz: loadImage('assets/night_sky_nz.png')
+        px: loadImage(`assets/textures/${texture}.jpg`),
+        nx: loadImage(`assets/textures/${texture}.jpg`),
+        py: loadImage(`assets/textures/${texture}.jpg`),
+        ny: loadImage(`assets/textures/${texture}.jpg`),
+        pz: loadImage(`assets/textures/${texture}.jpg`),
+        nz: loadImage(`assets/textures/${texture}.jpg`)
     };
 }
 
