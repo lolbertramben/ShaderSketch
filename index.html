@@ -10,9 +10,40 @@
                 padding: 0;
                 width: 100%;
             }
+            @font-face {
+                font-family: 'CustomFont';
+                src: url('./assets/font/ElsieSwashCaps-Regular.ttf') format('ttf');
+                font-weight: normal;
+                font-style: normal;
+            }
             body {
+                font-family: 'CustomFont', serif;
                 background: #FFF;
                 overflow: hidden;
+            }
+            .textContainer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                padding-left: 3rem;
+                padding-top: 2rem;
+                padding-bottom: 1.5rem;
+                text-align: left;
+            }
+            .title {
+                font-size: 4.5em;
+                color: #ffffff;
+                margin: 0;
+                text-align: left;
+                font-family: 'CustomFont', serif;
+            }
+            .controls {
+                font-size: 1.2em;
+                color: #c2c2c2;
+                margin: 0;
+                text-align: left;
+                font-family: 'CustomFont', sans-serif;
+                line-height: 160%;
             }
         </style>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
@@ -20,6 +51,10 @@
 
     <body>
         <div id="p5"></div>
+        <div class="textContainer">
+            <h1 class="title">Let it snow...</h1>
+            <p class="controls">by dragging the cursor <br/>or shaking the device</p>
+        </div>
         <script src="sketch.js"></script>
     </body>
 </html>
