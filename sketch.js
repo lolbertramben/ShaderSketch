@@ -124,10 +124,10 @@ function draw() {
     clear();
     // mouse position
     let mouse = [mouseX, mouseY];
-    let zMotion = round(width / 5 * abs(radians(rotationZ) - PI))
+    let zMotion = round(rotationZ)
     // x and y values moved from the centre point
-    let yMotion = round(height / 2 + rotationX * 10)
-    let xMotion = round(width / 2 + rotationY * 10)
+    let yMotion = round(rotationX)
+    let xMotion = round(rotationY)
 
     console.log("z: ",zMotion, "y: ",yMotion, "x: ",xMotion);
 
