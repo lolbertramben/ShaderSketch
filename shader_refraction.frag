@@ -10,7 +10,7 @@ uniform samplerCube iReflection;
 #define PI 3.14159265359
 #define TAU 6.28318530718
 #define fov 1.5
-#define IOR 1.3 // Index of refraction
+#define IOR 1.35 // Index of refraction
 #define abb .01 // Absorption
 #define density .1 // Optical density
 #define maxDist 100.
@@ -131,11 +131,12 @@ void main() {
         m = vec2(iResolution.xy)/2. / iResolution.xy;
     }
 
-    vec3 ro = vec3(0, 0, -3);
+    vec3 ro = vec3(0, 0., -2.4);
     ro.yz *= rot2D(m.y/2.);
     ro.xz *= rot2D(-m.x/2.);
     
     vec3 rd = GetRayDir(uv, ro, vec3(0,0.,0), fov);
+    rd.y -= .05;
     
     vec3 col = vec3(0.);
    
