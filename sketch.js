@@ -5,14 +5,6 @@ const texture = 'drawing';
 
 function preload() {
     shaderProgram = loadShader(`shader_base.vert`, `shader_${version}.frag`);
-    // cubeMap = {
-    //     px: loadImage('assets/night_sky_px.png'),
-    //     nx: loadImage('assets/night_sky_nx.png'),
-    //     py: loadImage('assets/night_sky_py.png'),
-    //     ny: loadImage('assets/night_sky_ny.png'),
-    //     pz: loadImage('assets/night_sky_pz.png'),
-    //     nz: loadImage('assets/night_sky_nz.png')
-    // };
     cubeMap = {
         px: loadImage(`assets/textures/${texture}.jpg`),
         nx: loadImage(`assets/textures/${texture}.jpg`),
@@ -31,6 +23,31 @@ function preload() {
     };
 }
 
+let isShake = false;
+let blizzardFactor = 0.0;
+let lerpTo = 0.0;
+let step = 0.05;
+let mousePrev = [0, 0];
+
+let motion = false;
+let ios = false;
+
+if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    document.body.addEventListener('click', function() {
+      DeviceMotionEvent.requestPermission()
+        .then(function() {
+          console.log('DeviceMotionEvent enabled');
+  
+          motion = true;
+          ios = true;
+        })
+        .catch(function(error) {
+          console.warn('DeviceMotionEvent not enabled', error);
+        })
+    })
+  }
+
+
 function setup() {
     let canvas = createCanvas(1024, 1024, WEBGL);
     canvas.parent('p5');
@@ -40,6 +57,10 @@ function setup() {
 
     gl = canvas.GL;
     createCubeMapTexture();
+    mousePrev = [mouseX, mouseY];
+
+    // Check if the user is on a mobile device
+    isMobile = checkIfMobile();
 }
 
 function createCubeMapTexture() {
@@ -90,16 +111,57 @@ function createCubeMapTexture() {
     shaderProgram.setUniform('iReflection', reflectionTexture);
 }
 
+function lerp(min, max, t) {
+    return min + (max - min) * t;
+}
+function clampToBinary(value) {
+    return max(0.0, min(1.0, value > 0.999 ? 1.0 : (value < 0.001 ? 0.0 : value)));
+}
+function checkIfMobile() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    return /android|iPad|iPhone|iPod/i.test(userAgent);
+}
+
 function draw() {
     clear();
+    // mouse position
+    let mouse = [mouseX, mouseY];
+
+    let zMotion = round(width / 5 * abs(radians(rotationZ) - PI))
+    // x and y values moved from the centre point
+    let yMotion = round(height / 2 + rotationX * 10)
+    let xMotion = round(width / 2 + rotationY * 10)
+
+    console.log(zMotion, yMotion, xMotion)
+
+    if (mouse[0] !== mousePrev[0] || mouse[1] !== mousePrev[1]) {
+        isShake = true;
+    } else if (zMotion > 230 && isMobile) {
+        isShake = true;        
+    } else {
+        isShake = false;
+    }
+
+    if (isShake) {
+       lerpTo = 1.0; 
+       step = 0.05;
+    } else {
+        lerpTo = 0.0;
+        step = 0.02;
+    }
+
+    blizzardFactor = lerp(blizzardFactor, lerpTo, step);
+    isShake = clampToBinary(isShake);
 
     // Pass the time and resolution to the shader
     shaderProgram.setUniform('iTime', millis() / 1000.0);
     shaderProgram.setUniform('iResolution', [1024, 1024]);
     shaderProgram.setUniform('iMouse', [mouseX, mouseY, mouseIsPressed ? 1.0 : 0.0, 0.0]);
+    shaderProgram.setUniform('iBlizzardFactor', blizzardFactor);
     
     // Draw a rectangle that covers the entire canvas
     rect(-width / 2, -height / 2, width, height);
+    mousePrev = [mouseX, mouseY];
 }
 
 function windowResized() {

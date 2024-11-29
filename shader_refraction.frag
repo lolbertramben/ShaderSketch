@@ -2,6 +2,7 @@ precision highp float;
 
 uniform vec2 iResolution;
 uniform vec4 iMouse;
+uniform float iBlizzardFactor;
 uniform float iTime;
 uniform samplerCube iSky;
 uniform samplerCube iReflection;
@@ -184,7 +185,7 @@ void main() {
         // Snow
         uv = -iMouse.xy/iResolution.xy + vec2(1.,iResolution.y/iResolution.x)*gl_FragCoord.xy / iResolution.xy;
         vec3 snowColor = snow(-rdOut.xy);
-        col += snowColor;
+        col += snowColor*iBlizzardFactor;
 
         // Snow Object
         float tSnowObject = RayMarch(pEnter, rdIn, 1., 1.);
