@@ -127,7 +127,9 @@ void main() {
     vec2 m = vec2(0);
     m.x = (iMouse.x * 2. - iResolution.x) / iResolution.x;
     m.y = (iMouse.y * 2. - iResolution.y) / iResolution.y;
-
+    if(iMouse.xy == vec2(0.)) {
+        m = vec2(iResolution.xy)/2. / iResolution.xy;
+    }
 
     vec3 ro = vec3(0, 0, -3);
     ro.yz *= rot2D(m.y/2.);
