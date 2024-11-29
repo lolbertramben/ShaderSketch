@@ -7,6 +7,8 @@ let isShake = 0.0;
 let mousePrev = [0, 0];
 let rotationVectorPrev = [0, 0, 0];
 let isMobile = false;
+let motion = false;
+let ios = false;
 
 function preload() {
     shaderProgram = loadShader(`shader_base.vert`, `shader_${version}.frag`);

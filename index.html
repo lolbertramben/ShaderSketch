@@ -22,12 +22,12 @@
                 overflow: hidden;
             }
             .textContainer {
-                position: fixed;
-                top: 0;
+                position: absolute;
+                bottom: 0;
                 left: 0;
                 padding-left: 3rem;
-                padding-top: 2rem;
-                padding-bottom: 1.5rem;
+                padding-bottom: 2rem;
+                padding-top: 1.5rem;
                 text-align: left;
                 z-index: 10;
             }
@@ -37,13 +37,15 @@
                 margin: 0;
                 text-align: left;
                 font-family: 'CustomFont', serif;
+                font-style: italic;
             }
             .controls {
                 font-size: 1.2em;
-                color: #c2c2c2;
+                color: #aaa;
                 margin: 0;
                 text-align: left;
                 font-family: 'CustomFont', sans-serif;
+                font-style: italic;
                 line-height: 160%;
             }
         </style>
@@ -52,10 +54,9 @@
 
     <body>
         <div id="p5"></div>
-        <!-- <div class="textContainer">
-            <h1 class="title">Let it snow...</h1>
-            <p class="controls">by dragging the cursor <br/>or shaking the device</p>
-        </div> -->
+        <div class="textContainer">
+            <p class="controls">klik på kuglen for at aktivere shake-feature.</p>
+        </div>
         <script src="sketch.js"></script>
     </body>
 </html>
