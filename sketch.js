@@ -151,7 +151,7 @@ function draw() {
     console.log("Delta rotation: ", deltaRotation);
 
     // Define a threshold for shaking detection
-    let shakeThreshold = 15.0;
+    let shakeThreshold = 5.0;
 
     if (mouse[0] !== mousePrev[0] || mouse[1] !== mousePrev[1]) {
         isShake = true;
