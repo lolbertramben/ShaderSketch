@@ -174,7 +174,7 @@ function draw() {
 
     // Pass the time and resolution to the shader
     shaderProgram.setUniform('iTime', millis() / 1000.0);
-    shaderProgram.setUniform('iResolution', [width, height]);
+    shaderProgram.setUniform('iResolution', [1024, 1024]);
     shaderProgram.setUniform('iMouse', [mouseX, mouseY, mouseIsPressed ? 1.0 : 0.0, 0.0]);
     shaderProgram.setUniform('iBlizzardFactor', blizzardFactor);
     
