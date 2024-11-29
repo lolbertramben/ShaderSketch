@@ -21,6 +21,14 @@ function preload() {
         pz: loadImage(`assets/textures/${texture}.jpg`),
         nz: loadImage(`assets/textures/${texture}.jpg`)
     };
+    reflectionMap = {
+        px: loadImage(`assets/textures/reflection.jpg`),
+        nx: loadImage(`assets/textures/reflection.jpg`),
+        py: loadImage(`assets/textures/reflection.jpg`),
+        ny: loadImage(`assets/textures/reflection.jpg`),
+        pz: loadImage(`assets/textures/reflection.jpg`),
+        nz: loadImage(`assets/textures/reflection.jpg`)
+    };
 }
 
 function setup() {
@@ -57,6 +65,29 @@ function createCubeMapTexture() {
     });
 
     shaderProgram.setUniform('iSky', texture);
+
+    const reflectionTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, reflectionTexture);
+
+    const facesRefl = [
+        { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, img: reflectionMap.px },
+        { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X, img: reflectionMap.nx },
+        { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y, img: reflectionMap.py },
+        { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, img: reflectionMap.ny },
+        { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z, img: reflectionMap.pz },
+        { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, img: reflectionMap.nz }
+    ];
+
+    facesRefl.forEach((face) => {
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, reflectionTexture);
+        gl.texImage2D(face.target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, face.img.canvas);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    });
+
+    shaderProgram.setUniform('iReflection', reflectionTexture);
 }
 
 function draw() {

@@ -4,6 +4,7 @@ uniform vec2 iResolution;
 uniform vec4 iMouse;
 uniform float iTime;
 uniform samplerCube iSky;
+uniform samplerCube iReflection;
 //scene
 #define PI 3.14159265359
 #define TAU 6.28318530718
@@ -20,7 +21,7 @@ uniform samplerCube iSky;
 #define width 0.9
 #define speed 0.8
 
-const vec3 glasscol = vec3(0.06,0.1,0.15);
+const vec3 glasscol = vec3(0.06,0.1,0.15)*0.;
 
 const mat3 pSnow = mat3(13.323122,23.5112,21.71123,21.1212,28.7312,11.9312,21.8112,14.7212,61.3934);
 float rnd(float n) {return fract(sin(n * 0.1346) * 43758.5453123);}
@@ -68,10 +69,6 @@ mat2 rot2D(float angle) {
 
 float scene(vec3 p) {
     //box
-    // p.xy *= rot2D(iTime);
-    // p.xz *= rot2D(iTime);
-    // float box = sdBox(p, vec3(1.));
-    // return box;
     float sphere = sdSphere(p, 1.);
     return sphere;
 }
@@ -137,7 +134,7 @@ void main() {
     
     vec3 rd = GetRayDir(uv, ro, vec3(0,0.,0), fov);
     
-    vec3 col = textureCube(iSky, rd).rgb;
+    vec3 col = vec3(0.);
    
     float t = RayMarch(ro, rd, 1., 0.); // outside of object
     
@@ -145,7 +142,7 @@ void main() {
         vec3 p = ro + rd * t; // 3d hit position
         vec3 n = GetNormal(p); // normal of surface... orientation
         vec3 r = reflect(rd, n);
-        vec3 refl = textureCube(iSky, r).rgb;
+        vec3 refl = textureCube(iReflection, r).rgb;
         
         vec3 rdIn = refract(rd, n, 1./IOR); // ray dir when entering
         
@@ -162,17 +159,17 @@ void main() {
         // Red
         rdOut = refract(rdIn, nExit, IOR-abb);
         if(dot(rdOut, rdOut)==0.) rdOut = reflect(rdIn, nExit);
-        reflTex.r = textureCube(iSky, rdOut).r;
+        reflTex.r = textureCube(iReflection, rdOut).r;
 
         // Green
         rdOut = refract(rdIn, nExit, IOR);
         if(dot(rdOut, rdOut)==0.) rdOut = reflect(rdIn, nExit);
-        reflTex.g = textureCube(iSky, rdOut).g;
+        reflTex.g = textureCube(iReflection, rdOut).g;
 
         // Blue
         rdOut = refract(rdIn, nExit, IOR+abb);
         if(dot(rdOut, rdOut)==0.) rdOut = reflect(rdIn, nExit);
-        reflTex.b = textureCube(iSky, rdOut).b;
+        reflTex.b = textureCube(iReflection, rdOut).b;
 
         // Ray Absorbtion (optical distance)
         float optDist = exp(-tIn*density);
@@ -182,7 +179,7 @@ void main() {
 
         // Fresnel
         float fresnel = pow(1. + dot(rd, n), 3.);
-        col = mix(reflTex, refl, fresnel);
+        col = mix(reflTex*0.5, refl, fresnel);
 
         // Snow
         uv = -iMouse.xy/iResolution.xy + vec2(1.,iResolution.y/iResolution.x)*gl_FragCoord.xy / iResolution.xy;
@@ -192,6 +189,7 @@ void main() {
         // Snow Object
         float tSnowObject = RayMarch(pEnter, rdIn, 1., 1.);
         col += 1. / vec3(tSnowObject) * 0.4;
+        //col = vec3(fresnel);
     }
     
     col = pow(col, vec3(.4545));	// gamma correction
