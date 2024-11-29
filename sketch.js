@@ -34,6 +34,7 @@ let step = 0.05;
 
 function setup() {
     let canvas = createCanvas(1024, 1024, WEBGL);
+    console.log(canvas);
     canvas.parent('p5');
     shader(shaderProgram);
     noStroke();
