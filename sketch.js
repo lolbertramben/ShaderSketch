@@ -33,7 +33,7 @@ let lerpTo = 0.0;
 let step = 0.05;
 
 function setup() {
-    let canvas = createCanvas(windowWidth, windowHeight, WEBGL);
+    let canvas = createCanvas(1024, 1024, WEBGL);
     canvas.parent('p5');
     shader(shaderProgram);
     noStroke();
@@ -174,7 +174,7 @@ function draw() {
 
     // Pass the time and resolution to the shader
     shaderProgram.setUniform('iTime', millis() / 1000.0);
-    shaderProgram.setUniform('iResolution', [1024, 1024]);
+    shaderProgram.setUniform('iResolution', [width, height]);
     shaderProgram.setUniform('iMouse', [mouseX, mouseY, mouseIsPressed ? 1.0 : 0.0, 0.0]);
     shaderProgram.setUniform('iBlizzardFactor', blizzardFactor);
     
