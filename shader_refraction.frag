@@ -77,7 +77,7 @@ float scene(vec3 p) {
 float sceneObjects(vec3 p) {
     // Sphere transform
   vec3 spherePos = vec3(.0, .0, .0); // Sphere position
-  float sphere = sdSphere(p - spherePos, .75); // Sphere SDF
+  float sphere = sdSphere(p - spherePos, .7); // Sphere SDF
   // Box transform
   vec3 pBox = p;
   pBox.y += 2.3;
