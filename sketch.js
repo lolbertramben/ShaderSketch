@@ -109,7 +109,7 @@ function createCubeMapTexture() {
     shaderProgram.setUniform('iReflection', reflectionTexture);
 }
 
-function lerp(min, max, t) {
+function lerpCustom(min, max, t) {
     return min + (max - min) * t;
 }
 function clampToBinary(value) {
@@ -129,7 +129,7 @@ function draw() {
     let yMotion = round(height / 2 + rotationX * 10)
     let xMotion = round(width / 2 + rotationY * 10)
 
-    console.log("z"+zMotion, "y"+yMotion, "x"+xMotion);
+    console.log("z: ",zMotion, "y: ",yMotion, "x: ",xMotion);
 
     if (mouse[0] !== mousePrev[0] || mouse[1] !== mousePrev[1]) {
         isShake = true;
@@ -147,7 +147,7 @@ function draw() {
         step = 0.02;
     }
 
-    blizzardFactor = lerp(blizzardFactor, lerpTo, step);
+    blizzardFactor = lerpCustom(blizzardFactor, lerpTo, step);
     isShake = clampToBinary(isShake);
 
     // Pass the time and resolution to the shader
