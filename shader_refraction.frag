@@ -82,7 +82,7 @@ float sceneObjects(vec3 p) {
   float sphere = sdSphere(p - spherePos, .75); // Sphere SDF
   // Box transform
   vec3 pBox = p;
-  pBox.y += 2.2;
+  pBox.y += 2.3;
   float box = sdBox(pBox - vec3(0., 1., 0.), vec3(1.))+sin(pBox.x *5.1+iTime)* .05; // Box SDF
 
   return opIntersection(sphere, box); // Union of the sphere and the box
