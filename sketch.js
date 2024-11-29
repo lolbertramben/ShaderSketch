@@ -127,17 +127,8 @@ function draw() {
     // mouse position
     let mouse = [mouseX, mouseY];
 
-    let zMotion = round(width / 5 * abs(radians(rotationZ) - PI))
-    // x and y values moved from the centre point
-    let yMotion = round(height / 2 + rotationX * 10)
-    let xMotion = round(width / 2 + rotationY * 10)
-
-    console.log(zMotion, yMotion, xMotion)
-
     if (mouse[0] !== mousePrev[0] || mouse[1] !== mousePrev[1]) {
         isShake = true;
-    } else if (zMotion > 230 && isMobile) {
-        isShake = true;        
     } else {
         isShake = false;
     }
@@ -162,6 +153,16 @@ function draw() {
     // Draw a rectangle that covers the entire canvas
     rect(-width / 2, -height / 2, width, height);
     mousePrev = [mouseX, mouseY];
+}
+
+function deviceShaken() {
+    value = value + 5;
+    if (value > 255) {
+        isShake = true;
+        value = 0;
+    } else {
+        isShake = false;
+    }
 }
 
 function windowResized() {
