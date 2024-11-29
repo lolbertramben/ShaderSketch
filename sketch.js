@@ -2,6 +2,11 @@ let shaderProgram;
 let version = 'refraction';
 let cubeMap;
 const texture = 'drawing';
+let gl;
+let isShake = 0.0;
+let mousePrev = [0, 0];
+let rotationVectorPrev = [0, 0, 0];
+let isMobile = false;
 
 function preload() {
     shaderProgram = loadShader(`shader_base.vert`, `shader_${version}.frag`);
@@ -23,15 +28,12 @@ function preload() {
     };
 }
 
-let isShake = false;
 let blizzardFactor = 0.0;
 let lerpTo = 0.0;
 let step = 0.05;
-let mousePrev = [0, 0];
-
 
 function setup() {
-    let canvas = createCanvas(1024, 1024, WEBGL);
+    let canvas = createCanvas(windowWidth, windowHeight, WEBGL);
     canvas.parent('p5');
     shader(shaderProgram);
     noStroke();
@@ -40,6 +42,7 @@ function setup() {
     gl = canvas.GL;
     createCubeMapTexture();
     mousePrev = [mouseX, mouseY];
+    rotationPrev = [rotationX, rotationY, rotationZ];
 
     // Check if the user is on a mobile device
     isMobile = checkIfMobile();
@@ -120,20 +123,39 @@ function checkIfMobile() {
     return /android|iPad|iPhone|iPod/i.test(userAgent);
 }
 
+function length(x1, y1, x2, y2) {
+    return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
+
 function draw() {
     clear();
     // mouse position
     let mouse = [mouseX, mouseY];
-    let zMotion = round(rotationZ)
-    // x and y values moved from the centre point
-    let yMotion = round(rotationX)
-    let xMotion = round(rotationY)
+    let rotationVector = [rotationX, rotationY, rotationZ];
 
-    console.log("z: ",zMotion, "y: ",yMotion, "x: ",xMotion);
+    let zMotion = round(rotationZ);
+    let yMotion = round(rotationX);
+    let xMotion = round(rotationY);
+    
+    console.log("z: ", zMotion, "y: ", yMotion, "x: ", xMotion);
+
+    let distance = length(mouseX, mouseY, width / 2, height / 2);
+    console.log("Distance from center: ", distance);
+
+    // Calculate the change in rotation vectors
+    let deltaRotation = [
+        abs(rotationVector[0] - rotationVectorPrev[0]),
+        abs(rotationVector[1] - rotationVectorPrev[1]),
+        abs(rotationVector[2] - rotationVectorPrev[2])
+    ];
+    console.log("Delta rotation: ", deltaRotation);
+
+    // Define a threshold for shaking detection
+    let shakeThreshold = 15.0;
 
     if (mouse[0] !== mousePrev[0] || mouse[1] !== mousePrev[1]) {
         isShake = true;
-    } else if (isMobile && (zMotion > 10 || yMotion > 10 || xMotion > 10)) {
+    } else if (isMobile && (deltaRotation[0] > shakeThreshold || deltaRotation[1] > shakeThreshold || deltaRotation[2] > shakeThreshold)) {
         isShake = true;
     } else {
         isShake = false;
@@ -159,6 +181,7 @@ function draw() {
     // Draw a rectangle that covers the entire canvas
     rect(-width / 2, -height / 2, width, height);
     mousePrev = [mouseX, mouseY];
+    rotationVectorPrev = rotationVector;
 }
 
 function windowResized() {
