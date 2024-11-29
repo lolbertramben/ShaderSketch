@@ -192,8 +192,6 @@ void main() {
         // Snow Object
         float tSnowObject = RayMarch(pEnter, rdIn, 1., 1.);
         col += 1. / vec3(tSnowObject) * 0.4;
-        
-    
     }
     
     col = pow(col, vec3(.4545));	// gamma correction
