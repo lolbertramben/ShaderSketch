@@ -28,22 +28,29 @@ float noise(vec3 p, float scale, float amount) {
   return clamp(noise, -1.0, 1.0);
 }
 
+float opIntersection( float d1, float d2 ){
+    return max(d1,d2);
+}
+
 
 // Distance to the scene (Objects)
 float map(vec3 p) {
   // Sphere transform
-  vec3 spherePos = vec3(.0, .0, 1.0); // Sphere position
+  vec3 spherePos = vec3(.0, .0, .0); // Sphere position
   float sphere = sdSphere(p - spherePos, .5); // Sphere SDF
   // Box transform
   vec3 pBox = p;
-  pBox.xy *= rot2D(iTime); // Rotate the box
-  pBox.xz *= rot2D(iTime); // Rotate the box
-  float box = sdBox(pBox, vec3(.1)); // Box SDF
+  pBox.y += 2.;
+  // pBox.xy *= rot2D(iTime); // Rotate the box
+  // pBox.xz *= rot2D(iTime); // Rotate the box
+  float box = sdBox(pBox - vec3(0., 1., 0.), vec3(1.))+sin(pBox.x *5.1+iTime)* .05; // Box SDF
   // Ground plane
   float ground = p.y + 0.75; // Ground plane
 
-  return min(ground, min(box, sphere)); // Union of the sphere and the box
+  return min(ground, opIntersection(sphere, box)); // Union of the sphere and the box
 }
+
+
 
 // Ray Marching
 float rayMarching (vec3 rayOrigin, vec3 rayDir) {
@@ -115,9 +122,9 @@ void main() {
 
   // Coloring
   vec3 col = vec3(0.0); 
-  //col = getNormal(p); // Color based on the normal
+  col = getNormal(p); // Color based on the normal
   col = vec3(diffuseLight);
-  //col = vec3(t * fog);                    // Color based on the distance traveled by the ray
+  col = 1./vec3(t);                    // Color based on the distance traveled by the ray
   //col *= noise(gl_FragCoord.xyz, 1., 1.); // Add noise
 
   gl_FragColor = vec4(col, 1.0);

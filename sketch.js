@@ -1,7 +1,7 @@
 let shaderProgram;
 let version = 'refraction';
 let cubeMap;
-const texture = 'soft_dark_upscale';
+const texture = 'gran';
 
 function preload() {
     shaderProgram = loadShader(`shader_base.vert`, `shader_${version}.frag`);

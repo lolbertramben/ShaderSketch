@@ -55,6 +55,10 @@ float sdBox( vec3 p, vec3 b ){
   return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 }
 
+float opIntersection( float d1, float d2 ){
+    return max(d1,d2);
+}
+
 // Rotate 2D
 mat2 rot2D(float angle) {
   float s = sin(angle);
@@ -72,12 +76,29 @@ float scene(vec3 p) {
     return sphere;
 }
 
-float RayMarch(vec3 ro, vec3 rd, float side) {
+float sceneObjects(vec3 p) {
+    // Sphere transform
+  vec3 spherePos = vec3(.0, .0, .0); // Sphere position
+  float sphere = sdSphere(p - spherePos, .75); // Sphere SDF
+  // Box transform
+  vec3 pBox = p;
+  pBox.y += 2.2;
+  float box = sdBox(pBox - vec3(0., 1., 0.), vec3(1.))+sin(pBox.x *5.1+iTime)* .05; // Box SDF
+
+  return opIntersection(sphere, box); // Union of the sphere and the box
+}
+
+float RayMarch(vec3 ro, vec3 rd, float side, float sceneIndex) {
     float t = 0.;
     
     for(int i=0; i<maxSteps; i++) {
         vec3 p = ro + rd * t;
-        float d = scene(p) * side;
+        float d;
+        if (sceneIndex == 0.) {
+            d = scene(p) * side;
+        } else {
+            d = sceneObjects(p) * side;
+        }
         t += d;
         if( t>maxDist || abs(d)<minDist) break;
     }
@@ -118,7 +139,7 @@ void main() {
     
     vec3 col = textureCube(iSky, rd).rgb;
    
-    float t = RayMarch(ro, rd, 1.); // outside of object
+    float t = RayMarch(ro, rd, 1., 0.); // outside of object
     
     if(t<maxDist) {
         vec3 p = ro + rd * t; // 3d hit position
@@ -129,7 +150,7 @@ void main() {
         vec3 rdIn = refract(rd, n, 1./IOR); // ray dir when entering
         
         vec3 pEnter = p - n*minDist*3.;
-        float tIn = RayMarch(pEnter, rdIn, -1.); // inside the object
+        float tIn = RayMarch(pEnter, rdIn, -1., 0.); // inside the object
         
         vec3 pExit = pEnter + rdIn * tIn; // 3d position of exit
         vec3 nExit = -GetNormal(pExit); 
@@ -167,6 +188,10 @@ void main() {
         uv = -iMouse.xy/iResolution.xy + vec2(1.,iResolution.y/iResolution.x)*gl_FragCoord.xy / iResolution.xy;
         vec3 snowColor = snow(-rdOut.xy);
         col += snowColor;
+
+        // Snow Object
+        float tSnowObject = RayMarch(pEnter, rdIn, 1., 1.);
+        col += 1. / vec3(tSnowObject) * 0.4;
         
     
     }
