@@ -29,24 +29,6 @@ let lerpTo = 0.0;
 let step = 0.05;
 let mousePrev = [0, 0];
 
-let motion = false;
-let ios = false;
-
-if (typeof DeviceMotionEvent.requestPermission === 'function') {
-    document.body.addEventListener('click', function() {
-      DeviceMotionEvent.requestPermission()
-        .then(function() {
-          console.log('DeviceMotionEvent enabled');
-  
-          motion = true;
-          ios = true;
-        })
-        .catch(function(error) {
-          console.warn('DeviceMotionEvent not enabled', error);
-        })
-    })
-  }
-
 
 function setup() {
     let canvas = createCanvas(1024, 1024, WEBGL);
@@ -61,6 +43,20 @@ function setup() {
 
     // Check if the user is on a mobile device
     isMobile = checkIfMobile();
+    console.log(isMobile);
+
+    // Bed om tilladelse til at bruge sensorer
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+      DeviceMotionEvent.requestPermission()
+        .then(response => {
+          if (response === 'granted') {
+            console.log("Tilladelse givet!");
+          } else {
+            console.log("Tilladelse afvist.");
+          }
+        })
+        .catch(console.error);
+    }
 }
 
 function createCubeMapTexture() {
