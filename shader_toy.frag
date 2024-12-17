@@ -15,7 +15,7 @@ vec2 tanhApprox(vec2 x) {
 
 vec2 func(vec2 p) {
     // (vec2(cos(), sin()) * MoveSpeed + MoveAmount)
-    return tanhApprox(vec2(cos(p.x * 3.0), sin(p.y * 2.0)) * 5.0 + 2.0);
+    return tanhApprox(vec2(cos(p.x * 3.0), sin(p.y * 2.0)) * 5.0 + 1.0);
 }
 
 float hash(vec2 p) {
@@ -92,15 +92,17 @@ void main() {
 
     vec3 col = carpet(P);
 
+    //Kugler
     vec2 q = fract(p) - 0.5;
     vec2 rnd = vec2(3.0, 2.0) * hash(floor(p)) * 6.3 + iTime * 0.4;
-    vec2 k = 0.18 * func(rnd);
-
+    vec2 k = 0.16 * func(rnd);
     float d = length(q - k) - 0.3;
-    float mask = smoothstep(0.02, 0.0, d);
+    float mask = smoothstep(.015, 0.0, d);
 
-    if (iMouse.z > 0.001 || fract(iTime * 0.07) < 0.) col *= smoothstep(0.0, 0.1, max(q.x, q.y) - 0.48);
+    //Mouse interaction for debugging
+    // if (iMouse.z > 0.001 || fract(iTime * 0.07) < 0.) col *= smoothstep(0.0, 0.1, max(q.x, q.y) - 0.48);
 
+    //Skygger
     vec2 pS = p + 0.2;
     vec2 rndS = vec2(3.0, 2.0) * hash(floor(pS)) * 6.3 + iTime * 0.4;
     vec2 kS = 0.18 * func(rndS);
@@ -111,7 +113,7 @@ void main() {
     col = 0.5 - mix(
         col,
         vec3(length((h - kS + 0.5) * 0.9)),
-        maskS * 0.4
+        maskS * 0.5
     );
 
     col = mix(col, vec3(length((q - k + 0.5) * 1.2)), mask);
