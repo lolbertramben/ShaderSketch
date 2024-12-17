@@ -14,8 +14,7 @@ vec2 tanhApprox(vec2 x) {
 }
 
 vec2 func(vec2 p) {
-    // (vec2(cos(), sin()) * MoveSpeed + MoveAmount)
-    return tanhApprox(vec2(cos(p.x * 3.0), sin(p.y * 2.0)) * 5.0 + 2.0);
+    return tanhApprox(vec2(cos(p.x * 3.0), sin(p.y * 2.0)) * 5.0 + 3.0);
 }
 
 float hash(vec2 p) {
@@ -58,15 +57,16 @@ vec2 round(vec2 v) {
 
 float shadowBG(vec2 p, vec3 lightPos) {
     vec3 normal = vec3(0.0, 0.0, -0.5);
-    vec3 l = normalize(lightPos - vec3(p, 5.0));
+    vec3 l = normalize(lightPos - vec3(p, 2.0));
     return dot(normal, l);
 }
 
 vec3 carpet(vec2 p, vec3 lightPos, float scale, float amount, float lineWidth) {
     float light = shadowBG(p, lightPos);
 
-    vec3 col = vec3(0.1, 0.8, 0.8);
-    col *= sin((p.x - p.y) * yRes / (0.5 + lineWidth)) * (round(hash(p)) * 0.34 + 0.18) + 1.0;
+    vec3 col = vec3(0.2);
+    col *= sin((p.x - p.y) * yRes / (0.5 + lineWidth)) 
+                * (round(hash(p)) * 0.34 + 0.18) + 1.0;
     
     float noiseVal = fbm(p * scale);
     noiseVal = mix(noiseVal, sin(noiseVal * 120.0 - cos(noiseVal * 420.0)), 0.2);
@@ -76,8 +76,7 @@ vec3 carpet(vec2 p, vec3 lightPos, float scale, float amount, float lineWidth) {
 }
 
 vec3 carpet(vec2 p) {
-    vec3 lightPos = vec3(cos(iTime), sin(iTime), .1);
-    //Mønster på tæppet
+    vec3 lightPos = vec3(cos(iTime), sin(iTime), 0.1);
     return carpet(p, lightPos, 0.4, 0.2, 1.2);
 }
 
@@ -85,10 +84,8 @@ void main() {
     vec2 R = iResolution.xy;
     yRes = min(R.y, 800.0);
     vec2 fragCoord = gl_FragCoord.xy;
-    // Normaliserer fragCoord
     vec2 P = (2.0 * fragCoord - R) / yRes;
-    // Skalerer P med 2
-    vec2 p = P * 1.0;
+    vec2 p = P * 2.0;
 
     vec3 col = carpet(P);
 
@@ -99,7 +96,8 @@ void main() {
     float d = length(q - k) - 0.3;
     float mask = smoothstep(0.02, 0.0, d);
 
-    if (iMouse.z > 0.001 || fract(iTime * 0.07) < 0.) col *= smoothstep(0.0, 0.1, max(q.x, q.y) - 0.48);
+    if (iMouse.z > 0.001 || fract(iTime * 0.07) < 0.2)
+        col *= smoothstep(0.0, 0.01, max(q.x, q.y) - 0.48);
 
     vec2 pS = p + 0.2;
     vec2 rndS = vec2(3.0, 2.0) * hash(floor(pS)) * 6.3 + iTime * 0.4;

@@ -124,7 +124,7 @@ void main() {
   vec3 col = vec3(0.0); 
   col = getNormal(p); // Color based on the normal
   col = vec3(diffuseLight);
-  col = 1./vec3(t);                    // Color based on the distance traveled by the ray
+  //col = 1./vec3(t);                    // Color based on the distance traveled by the ray
   //col *= noise(gl_FragCoord.xyz, 1., 1.); // Add noise
 
   gl_FragColor = vec4(col, 1.0);

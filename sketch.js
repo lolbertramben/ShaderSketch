@@ -1,5 +1,5 @@
 let shaderProgram;
-let version = 'refraction';
+let version = 'toy';
 let cubeMap;
 const texture = 'drawing';
 let gl;
@@ -35,7 +35,7 @@ let lerpTo = 0.0;
 let step = 0.05;
 
 function setup() {
-    let canvas = createCanvas(1024, 1024, WEBGL);
+    let canvas = createCanvas(windowWidth, windowHeight, WEBGL);
     console.log(canvas);
     canvas.parent('p5');
     shader(shaderProgram);
@@ -177,7 +177,7 @@ function draw() {
 
     // Pass the time and resolution to the shader
     shaderProgram.setUniform('iTime', millis() / 1000.0);
-    shaderProgram.setUniform('iResolution', [canvas.width, canvas.height]);
+    shaderProgram.setUniform('iResolution', [width, height]);
     shaderProgram.setUniform('iMouse', [mouseX, mouseY, mouseIsPressed ? 1.0 : 0.0, 0.0]);
     shaderProgram.setUniform('iBlizzardFactor', blizzardFactor);
     
