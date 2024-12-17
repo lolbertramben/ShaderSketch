@@ -88,7 +88,7 @@ void main() {
     // Normaliserer fragCoord
     vec2 P = (2.0 * fragCoord - R) / yRes;
     // Skalerer P med 2
-    vec2 p = P * 1.0;
+    vec2 p = P * 2.0;
 
     vec3 col = carpet(P);
 
